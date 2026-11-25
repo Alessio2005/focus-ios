@@ -20,7 +20,7 @@ struct Profile: Codable, Equatable {
     var streakState: StreakState { StreakState(streak: streak, lastDay: lastStreakDay, freezes: freezes) }
 }
 
-struct BlockList: Codable, Equatable, Identifiable, Hashable {
+struct BlockList: Codable, Equatable, Identifiable {
     var id = UUID()
     var name: String
     var selection = FamilyActivitySelection()
