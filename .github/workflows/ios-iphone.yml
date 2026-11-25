@@ -1,0 +1,131 @@
+name: iPhone-build (ondertekend)
+
+# Handmatig starten: Actions > iPhone-build (ondertekend) > Run workflow.
+# Vereist een betaald Apple Developer-account en deze repository-secrets:
+#   APPLE_TEAM_ID   Team ID (10 tekens) uit developer.apple.com > Account > Membership
+#   ASC_KEY_ID      Key ID van de App Store Connect API-sleutel (rol Admin)
+#   ASC_ISSUER_ID   Issuer ID van die sleutel
+#   ASC_KEY_P8      Volledige inhoud van het .p8-bestand
+on:
+  workflow_dispatch:
+    inputs:
+      method:
+        description: "development = .ipa voor je eigen iPhone, testflight = upload naar TestFlight"
+        type: choice
+        options: [development, testflight]
+        default: development
+      udid:
+        description: "UDID van je iPhone (alleen nodig bij development, één keer)"
+        required: false
+        default: ""
+      device_name:
+        description: "Naam voor je iPhone in het account"
+        required: false
+        default: "iPhone"
+
+jobs:
+  iphone:
+    runs-on: macos-latest
+    env:
+      TEAM_ID: ${{ secrets.APPLE_TEAM_ID }}
+      ASC_KEY_ID: ${{ secrets.ASC_KEY_ID }}
+      ASC_ISSUER_ID: ${{ secrets.ASC_ISSUER_ID }}
+      ASC_KEY_P8: ${{ secrets.ASC_KEY_P8 }}
+      METHOD: ${{ inputs.method }}
+
+    steps:
+      - name: Download source code
+        uses: actions/checkout@v4
+
+      - name: Check secrets
+        run: |
+          missing=""
+          for name in TEAM_ID ASC_KEY_ID ASC_ISSUER_ID ASC_KEY_P8; do
+            if [ -z "${!name}" ]; then missing="$missing $name"; fi
+          done
+          if [ -n "$missing" ]; then
+            echo "::error::Deze secrets ontbreken:$missing. Zie IPHONE.md in de repository."
+            exit 1
+          fi
+          mkdir -p "$RUNNER_TEMP/keys"
+          printf '%s' "$ASC_KEY_P8" > "$RUNNER_TEMP/keys/AuthKey.p8"
+          echo "KEY_PATH=$RUNNER_TEMP/keys/AuthKey.p8" >> "$GITHUB_ENV"
+
+      - name: Register iPhone
+        if: inputs.method == 'development' && inputs.udid != ''
+        env:
+          DEVICE_UDID: ${{ inputs.udid }}
+          DEVICE_NAME: ${{ inputs.device_name }}
+        run: ruby scripts/register_device.rb
+
+      - name: Install XcodeGen
+        run: brew install xcodegen
+
+      - name: Generate Xcode project
+        run: xcodegen generate
+
+      - name: Archive
+        run: |
+          set -o pipefail
+          xcodebuild \
+            -project Focus.xcodeproj \
+            -scheme Focus \
+            -configuration Release \
+            -destination 'generic/platform=iOS' \
+            -archivePath build/Focus.xcarchive \
+            -allowProvisioningUpdates \
+            -authenticationKeyPath "$KEY_PATH" \
+            -authenticationKeyID "$ASC_KEY_ID" \
+            -authenticationKeyIssuerID "$ASC_ISSUER_ID" \
+            DEVELOPMENT_TEAM="$TEAM_ID" \
+            CODE_SIGN_STYLE=Automatic \
+            CURRENT_PROJECT_VERSION="${{ github.run_number }}" \
+            archive
+
+      - name: Export
+        run: |
+          set -o pipefail
+          if [ "$METHOD" = "testflight" ]; then
+            EXPORT_METHOD=app-store-connect
+            DESTINATION=upload
+          else
+            EXPORT_METHOD=debugging
+            DESTINATION=export
+          fi
+          cat > build/ExportOptions.plist <<PLIST
+          <?xml version="1.0" encoding="UTF-8"?>
+          <!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+          <plist version="1.0">
+          <dict>
+            <key>method</key><string>$EXPORT_METHOD</string>
+            <key>destination</key><string>$DESTINATION</string>
+            <key>teamID</key><string>$TEAM_ID</string>
+            <key>signingStyle</key><string>automatic</string>
+            <key>manageAppVersionAndBuildNumber</key><false/>
+          </dict>
+          </plist>
+          PLIST
+          xcodebuild -exportArchive \
+            -archivePath build/Focus.xcarchive \
+            -exportPath build/export \
+            -exportOptionsPlist build/ExportOptions.plist \
+            -allowProvisioningUpdates \
+            -authenticationKeyPath "$KEY_PATH" \
+            -authenticationKeyID "$ASC_KEY_ID" \
+            -authenticationKeyIssuerID "$ASC_ISSUER_ID"
+          if [ "$METHOD" = "testflight" ]; then
+            echo "Geüpload naar App Store Connect. Over 10 tot 30 minuten staat build ${{ github.run_number }} in TestFlight." >> "$GITHUB_STEP_SUMMARY"
+          else
+            echo "Download het artifact FocusBlok-iPhone en installeer de .ipa met iMazing of 3uTools op Windows." >> "$GITHUB_STEP_SUMMARY"
+          fi
+
+      - name: Upload .ipa
+        if: inputs.method == 'development'
+        uses: actions/upload-artifact@v4
+        with:
+          name: FocusBlok-iPhone
+          path: build/export/*.ipa
+
+      - name: Remove key
+        if: always()
+        run: rm -rf "$RUNNER_TEMP/keys"
