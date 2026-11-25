@@ -39,8 +39,14 @@ struct MainTabs: View {
                 .tabItem { Label("Inzicht", systemImage: "chart.bar.fill") }
             RewardsView()
                 .tabItem { Label("Beloningen", systemImage: "star.fill") }
-            BlockingView()
-                .tabItem { Label("Blokkeren", systemImage: "lock.shield.fill") }
+            Group {
+                if FocusConfig.screenTimeEnabled {
+                    BlockingView()
+                } else {
+                    ShortcutsSetupView()
+                }
+            }
+            .tabItem { Label("Blokkeren", systemImage: "lock.shield.fill") }
             MoreView()
                 .tabItem { Label("Meer", systemImage: "ellipsis.circle.fill") }
         }

@@ -3,6 +3,7 @@ import Foundation
 /// Gedeelde opslag via een App Group, zodat app en extensies dezelfde gegevens zien.
 enum FocusShared {
     static let appGroup = "group.nl.focusapp.focus"
+    static let bouncedKey = "focus.bounced"
     private static let rulesKey = "focus.rules"
     private static let activeKey = "focus.activeBlocks"
     private static let sessionKey = "focus.activeSession"

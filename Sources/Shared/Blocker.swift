@@ -13,6 +13,7 @@ enum Blocker {
     }
 
     static func apply(_ selection: FamilyActivitySelection, to store: ManagedSettingsStore) {
+        guard FocusConfig.screenTimeEnabled else { return }
         store.shield.applications = selection.applicationTokens.isEmpty ? nil : selection.applicationTokens
         store.shield.webDomains = selection.webDomainTokens.isEmpty ? nil : selection.webDomainTokens
         if selection.categoryTokens.isEmpty {
@@ -32,6 +33,7 @@ enum Blocker {
     }
 
     static func unblock(ruleID: UUID) {
+        guard FocusConfig.screenTimeEnabled else { return }
         store(for: ruleID).clearAllSettings()
         FocusShared.setBlocked(false, ruleID: ruleID)
     }
@@ -39,6 +41,7 @@ enum Blocker {
     // MARK: Studieblok
 
     static func blockSession(_ session: ActiveSession) {
+        guard FocusConfig.screenTimeEnabled else { return }
         let store = ManagedSettingsStore(named: sessionStoreName)
         apply(session.selection, to: store)
         // Strikte modus: geblokkeerde apps kunnen tijdens het blok ook niet verwijderd worden.
@@ -46,6 +49,7 @@ enum Blocker {
     }
 
     static func unblockSession() {
+        guard FocusConfig.screenTimeEnabled else { return }
         ManagedSettingsStore(named: sessionStoreName).clearAllSettings()
     }
 
@@ -59,6 +63,7 @@ enum Blocker {
     }
 
     static func clearEverything() {
+        guard FocusConfig.screenTimeEnabled else { return }
         ManagedSettingsStore().clearAllSettings()
         unblockSession()
         for rule in FocusShared.loadRules() { store(for: rule.id).clearAllSettings() }

@@ -41,3 +41,46 @@ jobs:
         with:
           name: Focus-iOS-Build
           path: build/Build/Products/Debug-iphonesimulator/*.app
+
+  # Gratis versie voor je eigen iPhone: een niet-ondertekende .ipa die je met Sideloadly
+  # en een gratis Apple ID op je iPhone zet. Zie GRATIS-IPHONE.md.
+  free-ipa:
+    runs-on: macos-latest
+
+    steps:
+      - name: Download source code
+        uses: actions/checkout@v4
+
+      - name: Install XcodeGen
+        run: brew install xcodegen
+
+      - name: Generate Xcode project
+        run: xcodegen generate
+
+      - name: Build for iPhone (unsigned)
+        run: |
+          set -o pipefail
+          xcodebuild \
+            -project Focus.xcodeproj \
+            -scheme FocusBlokFree \
+            -sdk iphoneos \
+            -destination 'generic/platform=iOS' \
+            -configuration Release \
+            -derivedDataPath build \
+            CODE_SIGNING_ALLOWED=NO \
+            CODE_SIGNING_REQUIRED=NO \
+            CODE_SIGN_IDENTITY="" \
+            build
+
+      - name: Package .ipa
+        run: |
+          mkdir -p ipa/Payload
+          cp -R build/Build/Products/Release-iphoneos/FocusBlok.app ipa/Payload/
+          cd ipa && zip -qry ../FocusBlok-gratis.ipa Payload
+          ls -la ../FocusBlok-gratis.ipa
+
+      - name: Upload .ipa
+        uses: actions/upload-artifact@v4
+        with:
+          name: FocusBlok-gratis-ipa
+          path: FocusBlok-gratis.ipa

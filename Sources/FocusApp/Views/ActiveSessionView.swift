@@ -57,12 +57,24 @@ struct ActiveSessionView: View {
                 }
                 .frame(width: 260, height: 260)
 
+                if store.bouncedFromApp {
+                    Card {
+                        Label("Even niet! Je zit in je studieblok.", systemImage: "hand.raised.fill").font(.headline)
+                        Text("Die app moet wachten tot je blok of pauze. Zet het op je parkeerlijst als het belangrijk is.")
+                            .font(.subheadline).foregroundStyle(.secondary)
+                        Button("Oké, verder studeren") { store.bouncedFromApp = false }
+                            .buttonStyle(.borderedProminent)
+                    }
+                }
+
                 Card {
                     Label(session.task, systemImage: "target").font(.headline)
                     if !session.subject.isEmpty {
                         Label(session.subject, systemImage: "book.closed").font(.subheadline).foregroundStyle(.secondary)
                     }
-                    Label("Op slot: \(session.listName)", systemImage: "lock.fill").font(.subheadline).foregroundStyle(.secondary)
+                    if FocusConfig.screenTimeEnabled {
+                        Label("Op slot: \(session.listName)", systemImage: "lock.fill").font(.subheadline).foregroundStyle(.secondary)
+                    }
                     if session.strict {
                         Label("Strikte modus", systemImage: "exclamationmark.shield.fill").font(.subheadline).foregroundStyle(.red)
                     }
