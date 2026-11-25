@@ -75,7 +75,7 @@ struct SettingsView: View {
         case .approved: return "Toegestaan"
         case .denied: return "Geweigerd"
         case .notDetermined: return "Nog niet gevraagd"
-        @unknown default: return "Onbekend"
+        default: return "Onbekend"
         }
     }
 
