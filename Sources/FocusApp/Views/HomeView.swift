@@ -17,7 +17,7 @@ struct HomeView: View {
             ScrollScreen {
                 Text(greeting).font(.title2.bold())
 
-                if !screenTime.isAuthorized {
+                if FocusConfig.screenTimeEnabled && !screenTime.isAuthorized {
                     Card(title: "Schermtijd-toegang nodig") {
                         Text("FocusBlok heeft toestemming nodig om apps te blokkeren tijdens je studieblok.")
                             .font(.subheadline).foregroundStyle(.secondary)

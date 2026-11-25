@@ -142,6 +142,7 @@ final class AppStore: ObservableObject {
     /// Elke focusronde krijgt een eigen DeviceActivity-interval, zodat de extensie
     /// ook bij een gesloten app blokkeert en weer vrijgeeft.
     private func scheduleMonitoring(for session: ActiveSession) {
+        guard FocusConfig.screenTimeEnabled else { return }
         stopSessionMonitoring()
         let cal = Calendar.current
         let parts: Set<Calendar.Component> = [.year, .month, .day, .hour, .minute, .second]
@@ -160,6 +161,7 @@ final class AppStore: ObservableObject {
     }
 
     private func stopSessionMonitoring() {
+        guard FocusConfig.screenTimeEnabled else { return }
         let names = center.activities.filter {
             guard let kind = ActivityNaming.parse($0)?.kind else { return false }
             return kind == .session || kind == .pause
@@ -196,6 +198,9 @@ final class AppStore: ObservableObject {
 
     // MARK: Tijdens het blok
 
+    /// Wordt gezet als de Opdrachten-automatisering FocusBlok opende omdat je een afleidende app opende.
+    @Published var bouncedFromApp = false
+
     /// Pauzetegoed besteden: de apps zijn een paar minuten vrij. Niet in strikte modus.
     @discardableResult
     func usePause(minutes: Int) -> Bool {
@@ -217,6 +222,7 @@ final class AppStore: ObservableObject {
             intervalEnd: cal.dateComponents(parts, from: end),
             repeats: false
         )
+        guard FocusConfig.screenTimeEnabled else { return true }
         let name = ActivityNaming.name(.pause, id: session.id)
         center.stopMonitoring([name])
         do {
@@ -236,6 +242,10 @@ final class AppStore: ObservableObject {
     /// blokkade in de juiste stand zetten en vaste studietijden verwerken.
     func refresh() {
         active = FocusShared.activeSession()
+        if FocusShared.defaults.bool(forKey: FocusShared.bouncedKey) {
+            FocusShared.defaults.removeObject(forKey: FocusShared.bouncedKey)
+            bouncedFromApp = active != nil
+        }
         if let session = active {
             if session.phase().finished {
                 finish(completed: true)
@@ -363,7 +373,7 @@ final class AppStore: ObservableObject {
     }
 
     func wipeAll() {
-        center.stopMonitoring()
+        if FocusConfig.screenTimeEnabled { center.stopMonitoring() }
         Blocker.clearEverything()
         FocusShared.wipe()
         UNUserNotificationCenter.current().removeAllPendingNotificationRequests()

@@ -65,7 +65,22 @@ struct OnboardingView: View {
         .background(Color(.systemGroupedBackground).ignoresSafeArea())
     }
 
+    @ViewBuilder
     private var permissionPage: some View {
+        if FocusConfig.screenTimeEnabled {
+            screenTimePage
+        } else {
+            VStack(spacing: 18) {
+                Image(systemName: "square.on.square.squareshape.controlhandles").font(.system(size: 64)).foregroundStyle(.tint)
+                Text("Blokkeren met Opdrachten").font(.title.bold())
+                Text("Deze gratis versie blokkeert met een automatisering in de app Opdrachten: open je tijdens een blok een afleidende app, dan stuurt je iPhone je terug naar FocusBlok. In het tabblad Blokkeren staat hoe je dat in 2 minuten instelt.")
+                    .foregroundStyle(.secondary).multilineTextAlignment(.center)
+            }
+            .padding(32)
+        }
+    }
+
+    private var screenTimePage: some View {
         VStack(spacing: 18) {
             Image(systemName: "hand.raised.fill").font(.system(size: 64)).foregroundStyle(.tint)
             Text("Toestemming").font(.title.bold())

@@ -82,9 +82,11 @@ struct SettingsView: View {
     var body: some View {
         Form {
             Section("Rechten") {
-                LabeledContent("Schermtijd", value: statusText)
-                if !screenTime.isAuthorized {
-                    Button("Toestemming vragen") { Task { await screenTime.requestAuthorization() } }
+                if FocusConfig.screenTimeEnabled {
+                    LabeledContent("Schermtijd", value: statusText)
+                    if !screenTime.isAuthorized {
+                        Button("Toestemming vragen") { Task { await screenTime.requestAuthorization() } }
+                    }
                 }
                 Button("Meldingen toestaan") { AppStore.requestNotificationPermission() }
             }
@@ -105,10 +107,12 @@ struct SettingsView: View {
                 }
             }
 
-            Section {
-                Button("Alle limieten en vaste tijden uitzetten", role: .destructive) { confirmStop = true }
-            } footer: {
-                Text("Noodknop: stopt alle limieten en vaste studietijden en heft hun blokkades op.")
+            if FocusConfig.screenTimeEnabled {
+                Section {
+                    Button("Alle limieten en vaste tijden uitzetten", role: .destructive) { confirmStop = true }
+                } footer: {
+                    Text("Noodknop: stopt alle limieten en vaste studietijden en heft hun blokkades op.")
+                }
             }
 
             Section {
@@ -177,7 +181,9 @@ struct CreditsView: View {
             }
 
             Card(title: "Techniek") {
-                Text("Gebouwd met Swift, SwiftUI en Apple's Screen Time API (FamilyControls, ManagedSettings en DeviceActivity).")
+                Text(FocusConfig.screenTimeEnabled
+                     ? "Gebouwd met Swift, SwiftUI en Apple's Screen Time API (FamilyControls, ManagedSettings en DeviceActivity)."
+                     : "Gebouwd met Swift en SwiftUI. Deze gratis versie blokkeert via een automatisering in de app Opdrachten.")
                 Text("Ideeën opgedaan bij de open-source apps Rewire en Reef (MIT-licentie).")
                 Text("Code geschreven met hulp van Claude (Anthropic).")
             }

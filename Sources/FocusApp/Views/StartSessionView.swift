@@ -30,7 +30,7 @@ struct StartSessionView: View {
     }
 
     private var canStart: Bool {
-        !task.trimmingCharacters(in: .whitespaces).isEmpty && selectedList != nil
+        !task.trimmingCharacters(in: .whitespaces).isEmpty && (selectedList != nil || !FocusConfig.screenTimeEnabled)
     }
 
     var body: some View {
@@ -79,6 +79,7 @@ struct StartSessionView: View {
                     }
                 }
 
+                if FocusConfig.screenTimeEnabled {
                 Section {
                     Picker("Blokkeerlijst", selection: Binding(
                         get: { selectedList?.id },
@@ -100,14 +101,26 @@ struct StartSessionView: View {
                 } footer: {
                     Text("Bellen en berichten van iOS zelf blijven altijd werken.")
                 }
+                } else {
+                    Section {
+                        Label("Afleidende apps sturen je terug naar FocusBlok via je Opdrachten-automatisering.", systemImage: "arrow.uturn.backward.circle")
+                            .font(.footnote)
+                    } header: {
+                        Text("Wat gaat op slot?")
+                    } footer: {
+                        Text("Nog niet ingesteld? Kijk in het tabblad Blokkeren.")
+                    }
+                }
 
                 Section {
                     Toggle("Strikte modus", isOn: $strict)
                 } footer: {
-                    Text("Stoppen kost 30 seconden wachten en een zin overtypen. Pauzetegoed is uit en geblokkeerde apps kun je niet verwijderen.")
+                    Text(FocusConfig.screenTimeEnabled
+                         ? "Stoppen kost 30 seconden wachten en een zin overtypen. Pauzetegoed is uit en geblokkeerde apps kun je niet verwijderen."
+                         : "Stoppen kost 30 seconden wachten en een zin overtypen. Pauzetegoed is uit.")
                 }
 
-                if !screenTime.isAuthorized {
+                if FocusConfig.screenTimeEnabled && !screenTime.isAuthorized {
                     Section {
                         Text("Zonder Schermtijd-toestemming loopt de timer wel, maar worden er geen apps geblokkeerd.")
                             .font(.footnote).foregroundStyle(.orange)
@@ -122,7 +135,7 @@ struct StartSessionView: View {
                 }
                 ToolbarItem(placement: .confirmationAction) {
                     Button("Start") {
-                        guard let list = selectedList else { return }
+                        guard let list = selectedList ?? (FocusConfig.screenTimeEnabled ? nil : BlockList(name: "Opdrachten")) else { return }
                         AppStore.requestNotificationPermission()
                         store.start(task: task, subject: subject, plan: plan, list: list, strict: strict)
                         dismiss()
