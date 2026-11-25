@@ -7,7 +7,7 @@ options:
 settings:
   base:
     SWIFT_VERSION: "5.0"
-    MARKETING_VERSION: "0.1.0"
+    MARKETING_VERSION: "1.0.0"
     CURRENT_PROJECT_VERSION: "1"
     TARGETED_DEVICE_FAMILY: "1"
 targets:
@@ -20,7 +20,7 @@ targets:
     info:
       path: Sources/FocusApp/Info.plist
       properties:
-        CFBundleDisplayName: Focus
+        CFBundleDisplayName: FocusBlok
         UILaunchScreen: {}
         UISupportedInterfaceOrientations: [UIInterfaceOrientationPortrait]
     entitlements:
@@ -31,8 +31,14 @@ targets:
     settings:
       base:
         PRODUCT_BUNDLE_IDENTIFIER: nl.focusapp.focus
+        ASSETCATALOG_COMPILER_APPICON_NAME: AppIcon
+        ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME: AccentColor
     dependencies:
       - target: ActivityMonitor
+        embed: true
+      - target: ShieldConfiguration
+        embed: true
+      - target: ShieldAction
         embed: true
   ActivityMonitor:
     type: app-extension
@@ -43,7 +49,7 @@ targets:
     info:
       path: Sources/ActivityMonitor/Info.plist
       properties:
-        CFBundleDisplayName: Focus Monitor
+        CFBundleDisplayName: FocusBlok Monitor
         NSExtension:
           NSExtensionPointIdentifier: com.apple.deviceactivity.monitor-extension
           NSExtensionPrincipalClass: $(PRODUCT_MODULE_NAME).ActivityMonitorExtension
@@ -55,6 +61,48 @@ targets:
     settings:
       base:
         PRODUCT_BUNDLE_IDENTIFIER: nl.focusapp.focus.ActivityMonitor
+  ShieldConfiguration:
+    type: app-extension
+    platform: iOS
+    sources:
+      - Sources/ShieldConfiguration
+      - Sources/Shared
+    info:
+      path: Sources/ShieldConfiguration/Info.plist
+      properties:
+        CFBundleDisplayName: FocusBlok Blokkeerscherm
+        NSExtension:
+          NSExtensionPointIdentifier: com.apple.ManagedSettingsUI.shield-configuration-service
+          NSExtensionPrincipalClass: $(PRODUCT_MODULE_NAME).ShieldConfigurationExtension
+    entitlements:
+      path: Sources/ShieldConfiguration/ShieldConfiguration.entitlements
+      properties:
+        com.apple.developer.family-controls: true
+        com.apple.security.application-groups: [group.nl.focusapp.focus]
+    settings:
+      base:
+        PRODUCT_BUNDLE_IDENTIFIER: nl.focusapp.focus.ShieldConfiguration
+  ShieldAction:
+    type: app-extension
+    platform: iOS
+    sources:
+      - Sources/ShieldAction
+      - Sources/Shared
+    info:
+      path: Sources/ShieldAction/Info.plist
+      properties:
+        CFBundleDisplayName: FocusBlok Blokkeeractie
+        NSExtension:
+          NSExtensionPointIdentifier: com.apple.ManagedSettings.shield-action-service
+          NSExtensionPrincipalClass: $(PRODUCT_MODULE_NAME).ShieldActionExtension
+    entitlements:
+      path: Sources/ShieldAction/ShieldAction.entitlements
+      properties:
+        com.apple.developer.family-controls: true
+        com.apple.security.application-groups: [group.nl.focusapp.focus]
+    settings:
+      base:
+        PRODUCT_BUNDLE_IDENTIFIER: nl.focusapp.focus.ShieldAction
 schemes:
   Focus:
     build:
