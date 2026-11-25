@@ -1,0 +1,62 @@
+name: Focus
+options:
+  bundleIdPrefix: nl.focusapp
+  deploymentTarget:
+    iOS: "16.0"
+  createIntermediateGroups: true
+settings:
+  base:
+    SWIFT_VERSION: "5.0"
+    MARKETING_VERSION: "0.1.0"
+    CURRENT_PROJECT_VERSION: "1"
+    TARGETED_DEVICE_FAMILY: "1"
+targets:
+  Focus:
+    type: application
+    platform: iOS
+    sources:
+      - Sources/FocusApp
+      - Sources/Shared
+    info:
+      path: Sources/FocusApp/Info.plist
+      properties:
+        CFBundleDisplayName: Focus
+        UILaunchScreen: {}
+        UISupportedInterfaceOrientations: [UIInterfaceOrientationPortrait]
+    entitlements:
+      path: Sources/FocusApp/Focus.entitlements
+      properties:
+        com.apple.developer.family-controls: true
+        com.apple.security.application-groups: [group.nl.focusapp.focus]
+    settings:
+      base:
+        PRODUCT_BUNDLE_IDENTIFIER: nl.focusapp.focus
+    dependencies:
+      - target: ActivityMonitor
+        embed: true
+  ActivityMonitor:
+    type: app-extension
+    platform: iOS
+    sources:
+      - Sources/ActivityMonitor
+      - Sources/Shared
+    info:
+      path: Sources/ActivityMonitor/Info.plist
+      properties:
+        CFBundleDisplayName: Focus Monitor
+        NSExtension:
+          NSExtensionPointIdentifier: com.apple.deviceactivity.monitor-extension
+          NSExtensionPrincipalClass: $(PRODUCT_MODULE_NAME).ActivityMonitorExtension
+    entitlements:
+      path: Sources/ActivityMonitor/ActivityMonitor.entitlements
+      properties:
+        com.apple.developer.family-controls: true
+        com.apple.security.application-groups: [group.nl.focusapp.focus]
+    settings:
+      base:
+        PRODUCT_BUNDLE_IDENTIFIER: nl.focusapp.focus.ActivityMonitor
+schemes:
+  Focus:
+    build:
+      targets:
+        Focus: all

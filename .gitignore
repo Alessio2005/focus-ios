@@ -1,0 +1,6 @@
+# Wordt op GitHub door XcodeGen gegenereerd
+Focus.xcodeproj/
+build/
+DerivedData/
+.DS_Store
+xcuserdata/
