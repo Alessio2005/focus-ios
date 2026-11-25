@@ -37,9 +37,9 @@ enum Rewards {
     }
 
     static func levelProgress(xp: Int) -> Double {
-        let level = level(forXP: xp)
-        let from = xpForLevel(level)
-        let to = xpForLevel(level + 1)
+        let current = Self.level(forXP: xp)
+        let from = xpForLevel(current)
+        let to = xpForLevel(current + 1)
         return min(max(Double(xp - from) / Double(to - from), 0), 1)
     }
 

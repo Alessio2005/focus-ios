@@ -109,8 +109,8 @@ struct PlantView: View {
                 // Bloem
                 for k in 0..<6 {
                     let angle = Double(k) / 6 * 2 * .pi
-                    let cx = w / 2 + cos(angle) * w * 0.07
-                    let cy = stemTop + sin(angle) * w * 0.07
+                    let cx = w / 2 + CGFloat(cos(angle)) * w * 0.07
+                    let cy = stemTop + CGFloat(sin(angle)) * w * 0.07
                     context.fill(Path(ellipseIn: CGRect(x: cx - w * 0.055, y: cy - w * 0.055, width: w * 0.11, height: w * 0.11)),
                                  with: .color(Color(red: 0xF5 / 255, green: 0x9E / 255, blue: 0x0B / 255)))
                 }

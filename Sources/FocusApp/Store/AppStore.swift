@@ -23,13 +23,14 @@ final class AppStore: ObservableObject {
         let fm = FileManager.default
         let base = fm.containerURL(forSecurityApplicationGroupIdentifier: FocusShared.appGroup)
             ?? fm.urls(for: .documentDirectory, in: .userDomainMask)[0]
-        folder = base.appendingPathComponent("FocusBlok", isDirectory: true)
-        try? fm.createDirectory(at: folder, withIntermediateDirectories: true)
+        let dir = base.appendingPathComponent("FocusBlok", isDirectory: true)
+        try? fm.createDirectory(at: dir, withIntermediateDirectories: true)
+        folder = dir
 
-        profile = Self.read(Profile.self, "profile.json", in: folder) ?? Profile()
-        sessions = Self.read([StudySession].self, "sessions.json", in: folder) ?? []
-        notes = Self.read([ParkedNote].self, "notes.json", in: folder) ?? []
-        lists = Self.read([BlockList].self, "lists.json", in: folder) ?? [BlockList(name: "Social media")]
+        profile = Self.read(Profile.self, "profile.json", in: dir) ?? Profile()
+        sessions = Self.read([StudySession].self, "sessions.json", in: dir) ?? []
+        notes = Self.read([ParkedNote].self, "notes.json", in: dir) ?? []
+        lists = Self.read([BlockList].self, "lists.json", in: dir) ?? [BlockList(name: "Social media")]
         active = FocusShared.activeSession()
     }
 

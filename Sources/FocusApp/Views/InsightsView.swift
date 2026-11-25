@@ -19,12 +19,18 @@ struct InsightsView: View {
         }
     }
 
-    private var perSubject: [(subject: String, minutes: Int)] {
+    private struct SubjectMinutes: Identifiable {
+        let subject: String
+        let minutes: Int
+        var id: String { subject }
+    }
+
+    private var perSubject: [SubjectMinutes] {
         var totals: [String: Int] = [:]
         for s in store.sessions {
             totals[s.subject.isEmpty ? "Overig" : s.subject, default: 0] += s.focusedMinutes
         }
-        return totals.map { ($0.key, $0.value) }.sorted { $0.minutes > $1.minutes }
+        return totals.map { SubjectMinutes(subject: $0.key, minutes: $0.value) }.sorted { $0.minutes > $1.minutes }
     }
 
     private var weekMinutes: Int { lastSevenDays.reduce(0) { $0 + $1.minutes } }
@@ -63,7 +69,7 @@ struct InsightsView: View {
 
                 if !perSubject.isEmpty {
                     Card(title: "Per vak") {
-                        ForEach(perSubject, id: \.subject) { item in
+                        ForEach(perSubject) { item in
                             HStack {
                                 Text(item.subject)
                                 Spacer()
