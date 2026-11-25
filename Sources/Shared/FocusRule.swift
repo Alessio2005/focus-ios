@@ -1,7 +1,7 @@
 import Foundation
 import FamilyControls
 
-/// Soort regel: een dagelijkse limiet of een vast tijdschema.
+/// Soort regel: een dagelijkse limiet of een vaste studietijd.
 enum RuleKind: String, Codable, CaseIterable {
     case dailyLimit
     case schedule
@@ -14,6 +14,8 @@ struct FocusRule: Identifiable, Codable, Equatable {
     var kind: RuleKind
     var selection: FamilyActivitySelection = FamilyActivitySelection()
     var isEnabled: Bool = true
+    /// Taak voor een vaste studietijd (bijv. "Hoofdstuk 3 samenvatten").
+    var task: String = ""
 
     // Dagelijkse limiet
     var dailyLimitMinutes: Int = 30

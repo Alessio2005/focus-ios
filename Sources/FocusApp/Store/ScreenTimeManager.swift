@@ -36,6 +36,11 @@ final class ScreenTimeManager: ObservableObject {
         activeBlocks.contains(rule.id)
     }
 
+    func reload() {
+        rules = FocusShared.loadRules()
+        refresh()
+    }
+
     func refresh() {
         activeBlocks = FocusShared.activeBlockIDs()
         authorizationStatus = AuthorizationCenter.shared.authorizationStatus

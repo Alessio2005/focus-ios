@@ -26,6 +26,16 @@ struct RuleEditorView: View {
                     TextField("Bijvoorbeeld: Social media", text: $rule.name)
                 }
 
+                if rule.kind == .schedule {
+                    Section {
+                        TextField("Bijv. weekplanning maken", text: $rule.task)
+                    } header: {
+                        Text("Taak (optioneel)")
+                    } footer: {
+                        Text("Een vaste studietijd start vanzelf, ook als FocusBlok dicht is. Na afloop krijg je je beloning zodra je de app opent.")
+                    }
+                }
+
                 Section {
                     Button {
                         showPicker = true
@@ -70,7 +80,7 @@ struct RuleEditorView: View {
                     Toggle("Regel actief", isOn: $rule.isEnabled)
                 }
             }
-            .navigationTitle(rule.kind == .dailyLimit ? "Limiet" : "Schema")
+            .navigationTitle(rule.kind == .dailyLimit ? "Limiet" : "Vaste studietijd")
             .navigationBarTitleDisplayMode(.inline)
             .familyActivityPicker(isPresented: $showPicker, selection: $rule.selection)
             .toolbar {

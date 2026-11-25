@@ -2,12 +2,14 @@ import SwiftUI
 
 @main
 struct FocusApp: App {
-    @StateObject private var manager = ScreenTimeManager()
+    @StateObject private var store = AppStore()
+    @StateObject private var screenTime = ScreenTimeManager()
 
     var body: some Scene {
         WindowGroup {
-            ContentView()
-                .environmentObject(manager)
+            RootView()
+                .environmentObject(store)
+                .environmentObject(screenTime)
         }
     }
 }
