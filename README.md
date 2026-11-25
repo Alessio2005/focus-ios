@@ -32,6 +32,10 @@ Sources/Shared/                    Code die app en extensies delen
 
 App en extensies delen gegevens via App Group `group.nl.focusapp.focus`.
 
+## Op je iPhone
+
+Zie [IPHONE.md](IPHONE.md): ondertekende build via GitHub Actions, installeren vanaf Windows, of TestFlight.
+
 ## Bouwen
 
 Push naar `main` of start de workflow handmatig onder **Actions > Build iOS App > Run workflow**. De workflow
